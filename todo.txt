@@ -1,0 +1,13 @@
+Dataset
+- Fix thread for logging - does not stop...
+- Aggiungi classificazione filamnti: ogni punto a quale filamento appartiene (attraverso un indice): |x|y|z|class|filamentID|
+- pannello di controllo per creazione dataset
+- Filaments -> first training and validation round
+- Filaments from CAT08 -> final network fine tuning through training/validation + Final testing on real extracted trees 
+Netwoks
+- CNN -> baseline for performance
+- Continuous convolution (worth it? probably not)
+- Attention based transformers
+	- tokenisation
+	- attention based transformer
+

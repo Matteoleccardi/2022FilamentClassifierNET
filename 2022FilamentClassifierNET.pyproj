@@ -1,0 +1,48 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>dae20df2-8e18-4b94-8b25-41ab2e62d16c</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>_2022FilamentClassifierNET.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>2022FilamentClassifierNET</Name>
+    <RootNamespace>2022FilamentClassifierNET</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Dataset\DatasetCreator.py" />
+    <Compile Include="Dataset\DatasetCreator_utils.py" />
+    <Compile Include="NeuralNetwork\DiscreteCNN.py" />
+    <Compile Include="_2022FilamentClassifierNET.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dataset\" />
+    <Folder Include="Dataset\CAT08_dataset\" />
+    <Folder Include="Dataset\synthetic_dataset\" />
+    <Folder Include="NeuralNetwork\" />
+    <Folder Include="NeuralNetwork\trained_networks\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dataset\Points_classification.jpg" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
