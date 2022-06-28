@@ -97,9 +97,9 @@ class DiscreteCNN(nn.Module):
 # define dataset creator (all images - class couples) in a subfolder
 
 # define the dataloader in new file
-b=0
+
 # build train-validation cycles in new file -> save model parameters 
-a=0
+
 
 
 # Visualisation
