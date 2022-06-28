@@ -98,7 +98,7 @@ class DiscreteCNN(nn.Module):
 
 # define the dataloader in new file
 
-# build train-validation cycles in new file -> save model parameters
+# build train-validation cycles in new file -> save model parameters 
 
 
 
