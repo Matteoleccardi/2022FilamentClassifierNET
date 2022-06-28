@@ -23,7 +23,7 @@
   <ItemGroup>
     <Compile Include="Dataset\DatasetCreator.py" />
     <Compile Include="Dataset\DatasetCreator_utils.py" />
-    <Compile Include="NeuralNetwork\DiscreteCNN.py" />
+    <Compile Include="NeuralNetwork\DiscreteCNN\DiscreteCNN.py" />
     <Compile Include="_2022FilamentClassifierNET.py" />
   </ItemGroup>
   <ItemGroup>
@@ -31,7 +31,8 @@
     <Folder Include="Dataset\CAT08_dataset\" />
     <Folder Include="Dataset\synthetic_dataset\" />
     <Folder Include="NeuralNetwork\" />
-    <Folder Include="NeuralNetwork\trained_networks\" />
+    <Folder Include="NeuralNetwork\DiscreteCNN\" />
+    <Folder Include="NeuralNetwork\DiscreteCNN\trained_networks\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dataset\Points_classification.jpg" />

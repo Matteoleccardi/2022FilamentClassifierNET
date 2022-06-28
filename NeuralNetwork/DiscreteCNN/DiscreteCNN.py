@@ -94,19 +94,11 @@ class DiscreteCNN(nn.Module):
         return fc_layer
     
 
+# define dataset creator (all images - class couples) in a subfolder
 
+# define the dataloader in new file
 
-
-
-
-
-
-
-
-
-
-
-
+# build train-validation cycles in new file -> save model parameters
 
 
 

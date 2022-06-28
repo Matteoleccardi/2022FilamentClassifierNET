@@ -27,7 +27,7 @@ if 0:
         visualize_dataset_3D(pts)
 
 # NN models
-from NeuralNetwork.DiscreteCNN import *
+from NeuralNetwork.DiscreteCNN.DiscreteCNN import *
 n_voxels_per_side=41
 model = DiscreteCNN(n_voxels_per_side=n_voxels_per_side, out_point_classes=5)
 model.eval()
