@@ -35,6 +35,7 @@
     <Folder Include="Dataset\synthetic_dataset\" />
     <Folder Include="NeuralNetwork\" />
     <Folder Include="NeuralNetwork\DiscreteCNN\" />
+    <Folder Include="NeuralNetwork\DiscreteCNN\train_valid_test_data\" />
     <Folder Include="NeuralNetwork\DiscreteCNN\trained_networks\" />
   </ItemGroup>
   <ItemGroup>
