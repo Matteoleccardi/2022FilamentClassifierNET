@@ -24,6 +24,9 @@
     <Compile Include="Dataset\DatasetCreator.py" />
     <Compile Include="Dataset\DatasetCreator_utils.py" />
     <Compile Include="NeuralNetwork\DiscreteCNN\DiscreteCNN.py" />
+    <Compile Include="NeuralNetwork\DiscreteCNN\DiscreteCNN_data_loader.py" />
+    <Compile Include="NeuralNetwork\DiscreteCNN\DiscreteCNN_data_maker.py" />
+    <Compile Include="NeuralNetwork\DiscreteCNN\DiscreteCNN_trainer.py" />
     <Compile Include="_2022FilamentClassifierNET.py" />
   </ItemGroup>
   <ItemGroup>

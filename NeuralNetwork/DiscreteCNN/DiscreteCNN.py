@@ -41,20 +41,28 @@ def preprocess(filament: np.ndarray, index: int, n_voxels_per_side: int=31) -> t
         d_min = np.min([d_median, d_nn])
         # Populate volume
         [cx, cy, cz] = filament[index,:]
-        x_lowlim = cx - np.floor(n_voxels_per_side/2)*d_min - d_min/2
-        y_lowlim = cy - np.floor(n_voxels_per_side/2)*d_min - d_min/2
-        z_lowlim = cz - np.floor(n_voxels_per_side/2)*d_min - d_min/2
-        for xi in range(n_voxels_per_side):
-            xl, xh = x_lowlim + xi*d_min, x_lowlim + (xi + 1)*d_min
-            for yi in range(n_voxels_per_side):
-                yl, yh = y_lowlim + yi*d_min, y_lowlim + (yi + 1)*d_min
-                for zi in range(n_voxels_per_side):
-                    zl, zh = z_lowlim + zi*d_min, z_lowlim + (zi + 1)*d_min
-                    # Populate voxel
-                    for fp in filament:
-                        if ((xl <= fp[0]) and (fp[0] < xh)) and ((yl <= fp[1]) and (fp[1] < yh)) and ((zl <= fp[2]) and (fp[2] < zh)):
-                            volume[-1-zi, -1-yi, xi] += 1
-    # Set cap to one
+        half_side = d_min/2 + np.floor(n_voxels_per_side/2)*d_min
+        x_lowlim, x_highlim = cx - half_side, cx + half_side
+        y_lowlim, y_highlim = cy - half_side, cy + half_side
+        z_lowlim, z_highlim = cz - half_side, cz + half_side
+        x_centers = np.linspace(x_lowlim+d_min/2, x_highlim-d_min/2, num=n_voxels_per_side)
+        y_centers = np.linspace(y_lowlim+d_min/2, y_highlim-d_min/2, num=n_voxels_per_side)
+        z_centers = np.linspace(z_lowlim+d_min/2, z_highlim-d_min/2, num=n_voxels_per_side)
+        cond = filament[:,0] >= x_lowlim ## ------------------ PROVA A VELOCIZZARE COSI
+        cond = np.logical_and(cond, filament[:,0] <= x_highlim)
+        cond = np.logical_and(cond, filament[:,1] >= y_lowlim)
+        cond = np.logical_and(cond, filament[:,1] <= y_highlim)
+        cond = np.logical_and(cond, filament[:,2] >= z_lowlim)
+        cond = np.logical_and(cond, filament[:,2] <= z_highlim)
+        for p in filament[cond,:]:
+            xi = np.argmin( np.abs(x_centers - p[0]) )
+            yi = np.argmin( np.abs(y_centers - p[1]) )
+            zi = np.argmin( np.abs(z_centers - p[2]) )
+            if isinstance(xi, np.ndarray): xi = xi[0]
+            if isinstance(yi, np.ndarray): yi = yi[0]
+            if isinstance(zi, np.ndarray): zi = zi[0]
+            volume[zi, yi, xi] += 1
+    # Set max voxel value to one
     if torch.max(volume) != 0:
         volume = volume / torch.max(volume)
     # Output
