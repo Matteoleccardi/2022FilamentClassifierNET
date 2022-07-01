@@ -34,19 +34,21 @@ for dataset_dir in dataset_dir_list:
             len_c = content[content[:,3] == c,:].shape[0] 
             if len_c > n_limit:
                 n_limit = len_c
-        n_limit = 1.5 * n_limit
+        n_limit = int(2 * n_limit)
         # Make volumetric data
         for c in classes:
             n_max = np.min([(content[:,3] == c).shape[0], n_limit])
-            candidate_idxs = np.argwhere(content[:,3] == c)
-            candidate_idxs = np.random.shuffle(candidate_idxs)
-            for idx in candidate_idxs[:n_max]:
-                torch_tensor = preprocess(content, idx)
-                fname = os.path.join(traindata_save_dir, f"tensor{fcount:012d%}.pt")
-                torch.save(torch_tensor, fname)
-                fnames.append(fname)
-                flabels.append(c)
-                fcount += 1
+            if np.sum(content[:,3] == c) > 0:
+                candidate_idxs = np.argwhere(content[:,3] == c).flatten()
+                np.random.shuffle(candidate_idxs)
+                for idx in candidate_idxs[:n_max]:
+                    torch_tensor = preprocess(content[:,:3], idx, n_voxels_per_side=41)
+                    fname = os.path.join(traindata_save_dir, f"tensor{fcount:09d}.pt")
+                    torch.save(torch_tensor, fname)
+                    fnames.append(fname)
+                    flabels.append(c)
+                    fcount += 1
+                    print(f"{fcount}", end="\r")
 # Setup all data
 fnames = np.array(fnames)
 flabels = np.array(flabels)
@@ -59,3 +61,7 @@ np.savetxt(os.path.join(traindata_save_dir, f"train.csv"), fdata[:idx_train,:], 
 np.savetxt(os.path.join(traindata_save_dir, f"validation.csv"), fdata[idx_train:,:], delimiter=",", header="Tensor file name,Class")
 # Create Testing CSV
 # ... option not ready yet ...
+print("Training and validation datasets for DiscreteCNN successfully created.")
+print("Total data: ", n_data)
+print("  Train data: ", idx_train)
+print("  Validation data: ", n_data - idx_train)
