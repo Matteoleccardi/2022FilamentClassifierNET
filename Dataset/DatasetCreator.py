@@ -19,6 +19,6 @@ build_main_dataset(N_FILES, OPTIONS)
 
 
 # Example filament
-if 1:
+if 0:
     p = makefilament_classes_demo()
     visualize_dataset_3D(p)
