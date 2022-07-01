@@ -14,33 +14,52 @@ def preprocess(filament: np.ndarray, index: int, n_voxels_per_side: int=31) -> t
         Output:
             volume: a torch.tensor voxel volume representing the nearest surrounding of the point under scrutiny
     '''
-    # Find minimum distance between the point of interest and any other point in the filament
-    dists = np.linalg.norm(filament[index,:] - filament, axis=1)
-    dists[dists == 0] = 1e20
-    d_min = np.min(dists)/np.sqrt(2)
-    # Create 3D voxels volume (indexes: [z, y, x])
-    if n_voxels_per_side % 2 == 0: n_voxels_per_side += 1
+    # Input checks
+    if index > filament.shape[0]-1:
+        print(f"Invalid index {index} passed to function \"preprocess\", when filament is {filament.shape[0]} long. Quitting...")
+        quit()
+    #  Create 3D voxels volume (indexes: [z, y, x])
+    if n_voxels_per_side % 2 == 0:
+        n_voxels_per_side += 1
     volume = torch.zeros([n_voxels_per_side, n_voxels_per_side, n_voxels_per_side])
-    # Populate volume
-    [cx, cy, cz] = filament[index,:]
-    x_lowlim = cx - np.floor(n_voxels_per_side/2)*d_min - d_min/2
-    y_lowlim = cy - np.floor(n_voxels_per_side/2)*d_min - d_min/2
-    z_lowlim = cz - np.floor(n_voxels_per_side/2)*d_min - d_min/2
-    for xi in range(n_voxels_per_side):
-        xl, xh = x_lowlim + xi*d_min, x_lowlim + (xi + 1)*d_min
-        for yi in range(n_voxels_per_side):
-            yl, yh = y_lowlim + yi*d_min, y_lowlim + (yi + 1)*d_min
-            for zi in range(n_voxels_per_side):
-                zl, zh = z_lowlim + zi*d_min, z_lowlim + (zi + 1)*d_min
-                # Populate voxel
-                for fp in filament:
-                    if ((xl <= fp[0]) and (fp[0] < xh)) and ((yl <= fp[1]) and (fp[1] < yh)) and ((zl <= fp[2]) and (fp[2] < zh)):
-                        volume[-1-zi, -1-yi, xi] += 1
-    # Pseudo-normalisation
+    if filament.shape[0] == 1:
+        i = int( np.floor(n_voxels_per_side/2) + 1) - 1
+        volume[i,i,i] = 1
+    else:
+        # Find distance to be used as pixel spacing in the volume voxelisation
+        # -> Median distance between each point and its nn - useful when classifying isolated points
+        d_list = 1e20 * np.ones((filament.shape[0],))
+        for i in range(filament.shape[0]):
+            d = np.linalg.norm(filament[i,:] - filament, axis=1)
+            d = np.partition(d, kth=2)[1]
+            d_list[i] = d
+        d_median = np.median(d_list)
+        # -> Distance between the considered point to be classified and its nn
+        d_nn = np.linalg.norm(filament[index,:] - filament, axis=1)
+        d_nn = np.partition(d_nn, kth=2)[1] / np.sqrt(2)
+        # -> Find minimum distance and use that
+        d_min = np.min([d_median, d_nn])
+        # Populate volume
+        [cx, cy, cz] = filament[index,:]
+        x_lowlim = cx - np.floor(n_voxels_per_side/2)*d_min - d_min/2
+        y_lowlim = cy - np.floor(n_voxels_per_side/2)*d_min - d_min/2
+        z_lowlim = cz - np.floor(n_voxels_per_side/2)*d_min - d_min/2
+        for xi in range(n_voxels_per_side):
+            xl, xh = x_lowlim + xi*d_min, x_lowlim + (xi + 1)*d_min
+            for yi in range(n_voxels_per_side):
+                yl, yh = y_lowlim + yi*d_min, y_lowlim + (yi + 1)*d_min
+                for zi in range(n_voxels_per_side):
+                    zl, zh = z_lowlim + zi*d_min, z_lowlim + (zi + 1)*d_min
+                    # Populate voxel
+                    for fp in filament:
+                        if ((xl <= fp[0]) and (fp[0] < xh)) and ((yl <= fp[1]) and (fp[1] < yh)) and ((zl <= fp[2]) and (fp[2] < zh)):
+                            volume[-1-zi, -1-yi, xi] += 1
+    # Set cap to one
     if torch.max(volume) != 0:
         volume = volume / torch.max(volume)
     # Output
-    volume = torch.unsqueeze(torch.unsqueeze(volume,0), 0)
+    volume = torch.unsqueeze(volume, 0)
+    volume = torch.unsqueeze(volume, 0)
     return volume
 
 
