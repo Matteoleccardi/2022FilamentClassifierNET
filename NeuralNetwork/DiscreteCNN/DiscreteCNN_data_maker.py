@@ -4,6 +4,7 @@
 import numpy as np
 import os
 import torch
+import time
 from multiprocessing import Pool, cpu_count
 from DiscreteCNN import preprocess
 
@@ -46,7 +47,7 @@ if __name__ == '__main__':
             #   Class 2: take max between classes 0, 1, 3, 4
             #   Class 3: take all
             #   Class 4: take all
-            #   Class N: take all il not substantially much more that the other classes
+            #   Class N: take all if not substantially much more that the other classes
             n_limit = 0
             for c in np.delete(classes,2):
                 len_c = content_classes[content_classes == c].shape[0] 
@@ -74,31 +75,41 @@ if __name__ == '__main__':
     data = np.array(data).T
 
     # Make the volumetric data with multiprocess
-    print(f"Starting torch tensors creation on {cpu_count()+1} processes (= number of CPUs cores + 1)...")
+    print(f"Creating torch input tensors on {cpu_count()+1} processes (= number of CPUs cores + 1)...")
     multiprocess_inputs = []
     for row in data:
         multiprocess_inputs.append(row)
+    t0 = time.time()
     with Pool(processes=cpu_count()+1) as p:
-            #p.map(f, [1, 2, 3])
             p.map(make_volume, multiprocess_inputs)
-            #for i in p.imap_unordered(make_volume, multiprocess_inputs):
-            #    print(i, end="\r")
-    print(f"All {data.shape[0]} files successfully created.")
+    t1 = time.time()
+    # Check if all data were created successfully
+    missing_files = []
+    for row in multiprocess_inputs:
+        filename = row[3]
+        if not os.path.isfile(filename):
+            missing_files.append(filename)
+    if len(missing_files) == 0:
+        print(f"All {len(multiprocess_inputs)} files successfully created in {int(np.floor((t1-t0)/60))} min {int(t1-t0) % 60} s.")
+    else:
+        print(f"{len(missing_files)} files were not created (on {len(multiprocess_inputs)} files):")
+        print(missing_files)
 
-    quit()
-    # Setup all data in CSV files
+    # Put everything in CSV files
     n_data = data.shape[0]
-    # Create Training CSV
+    np.random.shuffle(data)
+    # -> Create Training CSV
     idx_train = int(n_data*0.7)
-    np.savetxt(os.path.join(traindata_save_dir, f"train.csv"), fdata[:idx_train,:], fmt=["%s", "%d"], delimiter=",", header="Tensor file name,Class")
-    # Create Validation CSV
-    np.savetxt(os.path.join(traindata_save_dir, f"validation.csv"), fdata[idx_train:,:], fmt=["%s", "%d"], delimiter=",", header="Tensor file name,Class")
-    # Create Testing CSV
+    np.savetxt(os.path.join(traindata_save_dir, f"train.csv"), data[:idx_train,[3,2]], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
+    # -> Create Validation CSV
+    np.savetxt(os.path.join(traindata_save_dir, f"validation.csv"), data[idx_train:,[3,2]], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
+    # -> Create Testing CSV
     # ... option not ready yet ...
     print("Training and validation datasets for DiscreteCNN successfully created.")
+    print("Folder: " + traindata_save_dir)
     print("Total data: ", n_data)
-    print("  Train data: ", idx_train)
-    print("  Validation data: ", n_data - idx_train)
+    print(" |-- Train data: ", idx_train)
+    print(" |-- Validation data: ", n_data - idx_train)
+    print(" |-- Test data: not yet created")
 
-    # ---------- AGGIUNGI THREADS -----------------
-    # risolvi errore
+# FIX ISSUES WITH SAVETXT: https://numpy.org/doc/stable/user/basics.rec.html

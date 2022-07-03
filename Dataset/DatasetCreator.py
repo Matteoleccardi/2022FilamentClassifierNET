@@ -4,21 +4,14 @@
 
 '''
 import numpy as np
-from DatasetCreator_utils import build_main_dataset, visualize_dataset_statistics
-from DatasetCreator_utils import makefilament_classes_demo, visualize_dataset_3D
+from DatasetCreator_utils import build_main_dataset
 
-
-# Build dataset
-N_FILES = {
-    "synthetic": 1,
-    "cat08": 0
-}
-OPTIONS = "new" # "new", "add"
-np.random.seed(0)
-build_main_dataset(N_FILES, OPTIONS)
-
-
-# Example filament
-if 0:
-    p = makefilament_classes_demo()
-    visualize_dataset_3D(p)
+if __name__ == "__main__":
+    # Build dataset
+    N_FILES = {
+        "synthetic": 1,
+        "cat08": 0
+    }
+    OPTIONS = "new" # "new", "add"
+    np.random.seed(0)
+    build_main_dataset(N_FILES, OPTIONS)
