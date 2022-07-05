@@ -4,6 +4,7 @@
 
 '''
 import numpy as np
+import os
 from DatasetCreator_utils import build_main_dataset
 
 if __name__ == "__main__":
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     
     # Build dataset
     N_FILES = {
-        "synthetic": 1,
+        "synthetic": 15,
         "cat08": 0
     }
     OPTIONS = "new" # "new", "add"

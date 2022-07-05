@@ -1,5 +1,5 @@
 '''
-
+    Training and validation datasets creator for the network DiscreteCNN
 '''
 import numpy as np
 import os
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         quit()
     base_dir = os.path.join(os.getcwd(), "Dataset")
     dataset_dir_list = ["synthetic_dataset", "CAT08_dataset"]
-    traindata_save_dir = os.path.join(os.getcwd(), "NeuralNetwork", "DiscreteCNN", "train_valid_test_data")
+    traindata_save_dir = os.path.join(os.getcwd(), "NeuralNetwork", "DiscreteCNN", "train_valid_data")
 
     # Dataset infos
     classes = [0, 1, 2, 3, 4]
@@ -120,8 +120,6 @@ if __name__ == '__main__':
     np.savetxt(os.path.join(traindata_save_dir, f"train.csv"), data_to_save[:idx_train], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
     # -> Create Validation CSV
     np.savetxt(os.path.join(traindata_save_dir, f"validation.csv"), data_to_save[idx_train:], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
-    # -> Create Testing CSV
-    # ... option not ready yet ...
     print("----------------------------------------------------------------------")
     print("Training and validation datasets for DiscreteCNN successfully created.")
     print("Folder: " + traindata_save_dir)

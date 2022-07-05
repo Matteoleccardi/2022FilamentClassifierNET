@@ -1112,7 +1112,7 @@ def build_main_dataset_log(n_files):
         estim = (total-count_tot)*(time.time()-t_start)/count_tot - 1 if (count_tot != 0) else 0
         pulser = " | " if pulse else " - "
         pulse = not pulse
-        print(f"{100*count_dir1/total:.2f}% completed. Estimated time left: {abs(estim/60):.1f} minutes.  " + pulser + " ", end="\r")
+        print(f"{100*count_dir1/total:.2f}% completed. Estimated time left: {floor(estim/60):3d} min {int(estim%60):2d} s.  " + pulser + " ", end="\r")
         time.sleep(1)
     print(f"Total elapsed time: {int((time.time()-t_start)/60)} minute(s).")
 
