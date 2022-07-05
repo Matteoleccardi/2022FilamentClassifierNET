@@ -1091,6 +1091,7 @@ def save_pointcloud_file(points: np.ndarray, save_index: int, subdirectory: str)
 
 
 def build_main_dataset_log(n_files):
+    global stopper
     total = int( np.sum( [x for x in n_files.values()] ) )
     pulse = True
     count_tot = 0
@@ -1112,9 +1113,10 @@ def build_main_dataset_log(n_files):
         estim = (total-count_tot)*(time.time()-t_start)/count_tot - 1 if (count_tot != 0) else 0
         pulser = " | " if pulse else " - "
         pulse = not pulse
-        print(f"{100*count_dir1/total:.2f}% completed. Estimated time left: {floor(estim/60):3d} min {int(estim%60):2d} s.  " + pulser + " ", end="\r")
+        print(f"Around {100*count_dir1/total:3.0f}% completed in {int(np.floor((time.time()-t_start)/60)):3d} min {int((time.time()-t_start)%60):2d} s.  " + pulser + " ", end="\r")
         time.sleep(1)
-    print(f"Total elapsed time: {int((time.time()-t_start)/60)} minute(s).")
+        if stopper: break
+    print(f"\nTotal elapsed time: {int(np.floor((time.time()-t_start)/60)):3d} min {int((time.time()-t_start)%60):2d} s.")
 
 def build_main_dataset(n_files, options="new"):
     '''
@@ -1135,19 +1137,23 @@ def build_main_dataset(n_files, options="new"):
         if n_files[k] < nfm: n_files[k] = nfm
     # Manage options
     if options == "new":
+        n_files_log = n_files
         for d in dirs:
             filelist = [ f for f in os.listdir(d) if f.endswith(".csv") ]
             for f in filelist: os.remove(os.path.join(d, f))
         counter = 0
     elif options == "add":
+        n_files_log = n_files
         for d,k in zip(dirs, n_files):
             nf = len([f for f in os.listdir(d) if f.endswith(".csv") ])
-            n_files[k] += nf
+            n_files_log[k] += nf
     else:
         print("Option \"" + options + "\" is not supported. Quitting...")
         quit()
     # Setup parallel log system
-    worker = Thread(target=build_main_dataset_log, args=[n_files])
+    global stopper
+    stopper = False
+    worker = Thread(target=build_main_dataset_log, args=[n_files_log])
     worker.daemon = True
     worker.start()
     # START SYNTHETIC
@@ -1155,57 +1161,58 @@ def build_main_dataset(n_files, options="new"):
     syn_rates = [5, 5, 10, 10, 15, 10, 20, 50]
     syn_rates = np.array(syn_rates)/np.sum(syn_rates)
     # -- LINEAR
-    for i in range( int(np.max([1, syn_rates[0] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[0] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(3, 80, 200) )
         l = np.random.uniform(0.01, 1000)
         pts = makefilament_001(n, l)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
-    for i in range( int(np.max([1, syn_rates[1] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[1] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(3, 80, 200) )
         l = np.random.uniform(0.01, 1000)
         n_f = int( np.random.triangular(1, 5, 15) )
         pts = makefilament_002(n, l, n_f)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
-    for i in range( int(np.max([1, syn_rates[2] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[2] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(14, 80, 200) )
         l = np.random.uniform(0.01, 1000)
         pts = makefilament_003(n, l)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
-    for i in range( int(np.max([1, syn_rates[3] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[3] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(14, 80, 200) )
         l = np.random.uniform(0.01, 1000)
         pts = makefilament_aggregator(makefilament_003, n, l, 10)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
-    for i in range( int(np.max([1, syn_rates[4] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[4] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(14, 80, 200) )
         l = np.random.uniform(0.01, 1000)
         pts = makefilament_004(n, l)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
-    for i in range( int(np.max([1, syn_rates[5] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[5] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(14, 80, 200) )
         l = np.random.uniform(0.01, 1000)
         pts = makefilament_aggregator(makefilament_004, n, l)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
     # -- SPLINES
-    for i in range( int(np.max([1, syn_rates[6] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[6] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(14, 80, 200) )
         pts = makefilament_005(n_points=n)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
-    for i in range( int(np.max([1, syn_rates[7] *n_files["synthetic"]/100])) ):
+    for i in range( int(np.ceil(np.max([1, syn_rates[7] *n_files["synthetic"]]))) ):
         n = int( np.random.triangular(60, 120, 300) )
         n_b = np.random.randint(1, 4)
         pts = makefilament_006(n_points=n, n_branching_points=n_b)
         save_pointcloud_file(pts, save_index=counter, subdirectory="synthetic_dataset/")
         counter += 1
     # End parallel log system
-    time.sleep(2)
+    stopper = True
+    time.sleep(3)
     worker.join()
     # Visualisa dataset statistics
     view_dataset_statistics()

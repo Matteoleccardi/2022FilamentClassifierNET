@@ -7,6 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Dataset.DatasetCreator_utils import *
 
+# Manage directories
+if os.path.basename(os.getcwd()) != "2022FilamentClassifierNET":
+    print("ERROR:\nEvery script must be executed from inside the 2022FilamentClassifierNET directory")
+    quit()
+    
+
 view_dataset_statistics(); quit()
 
 # Example filament

@@ -25,7 +25,7 @@ def logger(n_target:int, dir_pt):
         n = len([name for name in os.listdir(dir_pt) if (os.path.isfile(os.path.join(dir_pt, name)) and name.endswith(".pt"))])
         pulser = " | " if pulse else " - "
         pulse = not pulse
-        print(f"{100*n/n_target}% completed. " + pulser, end="\r")
+        print(f"{100*n/n_target:3.2f}% completed. " + pulser, end="\r")
         time.sleep(0.5)
 
 if __name__ == '__main__':

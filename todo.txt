@@ -5,6 +5,8 @@ Dataset
 
 Netwoks
 - CNN -> baseline for performance
+	- dataloader
+	- Train cycle
 - Continuous convolution (worth it? probably not)
 - Attention based transformers
 	- tokenisation
