@@ -1090,9 +1090,7 @@ def save_pointcloud_file(points: np.ndarray, save_index: int, subdirectory: str)
     np.savetxt(fname, points, delimiter=",", header="x,y,z,class,id", fmt=["%.9f","%.9f","%.9f","%d","%d",])
 
 
-def build_main_dataset_log():
-    global q_build_main_dataset_log
-    n_files = q_build_main_dataset_log.get()
+def build_main_dataset_log(n_files):
     total = int( np.sum( [x for x in n_files.values()] ) )
     pulse = True
     count_tot = 0
@@ -1104,7 +1102,7 @@ def build_main_dataset_log():
     print( "-----------------------------------------")
     print(" ")
     t_start = time.time()
-    while True:
+    while total > count_tot:
         # Counts
         count_dir1 = len(os.listdir("./Dataset/synthetic_dataset/"))
         count_dir2 = len(os.listdir("./Dataset/CAT08_dataset/"))
@@ -1115,9 +1113,8 @@ def build_main_dataset_log():
         pulser = " | " if pulse else " - "
         pulse = not pulse
         print(f"{100*count_dir1/total:.2f}% completed. Estimated time left: {abs(estim/60):.1f} minutes.  " + pulser + " ", end="\r")
-        if (total-count_tot) == 0: time.sleep(1); break
         time.sleep(1)
-    print(f"Finalising dataset. Total elapsed time: {int((time.time()-t_start)/60)} minute(s).")
+    print(f"Total elapsed time: {int((time.time()-t_start)/60)} minute(s).")
 
 def build_main_dataset(n_files, options="new"):
     '''
@@ -1150,10 +1147,7 @@ def build_main_dataset(n_files, options="new"):
         print("Option \"" + options + "\" is not supported. Quitting...")
         quit()
     # Setup parallel log system
-    global q_build_main_dataset_log
-    q_build_main_dataset_log = Queue()
-    q_build_main_dataset_log.put(n_files)
-    worker = Thread(target=build_main_dataset_log)
+    worker = Thread(target=build_main_dataset_log, args=[n_files])
     worker.daemon = True
     worker.start()
     # START SYNTHETIC
@@ -1214,28 +1208,43 @@ def build_main_dataset(n_files, options="new"):
     time.sleep(2)
     worker.join()
     # Visualisa dataset statistics
-    visualize_dataset_statistics()
+    view_dataset_statistics()
 
 # Statistics
 # ----------
 
-def visualize_dataset_statistics():
+def view_dataset_statistics():
     # Variables
     dirs = ["./Dataset/synthetic_dataset/", "./Dataset/CAT08_dataset/"]
+    classes = [0, 1, 2, 3, 4]
     # Retrieve data
     tot_files = 0
+    classes_list = []
+    structures_list = []
     for d in dirs:
         f_list = [ f for f in os.listdir(d) if f.endswith(".csv") ]
         tot_files += len(f_list)
-    # m
+        for f in f_list:
+            content_classes = np.loadtxt(os.path.join(d, f), delimiter=",", skiprows=1, usecols=3).flatten()
+            content_structures = np.loadtxt(os.path.join(d, f), delimiter=",", skiprows=1, usecols=4).flatten()
+            classes_list.append(content_classes)
+            structures_list.append(np.max(content_structures)+1)
+    # Files numerosity
     print("\n\nDATASET STATISTICS")
-    print("------------------")
-    print(f"\t{int(tot_files)} total files, of which:")
+    print("------------------------------------------------------------------")
+    print(f"-  {int(tot_files)} total files, of which:")
     for d in dirs:
-        print(f"\t\t{len([f for f in os.listdir(d) if f.endswith('.csv') ])} inside \""+d+"\"")
-    print(" total structures, of which:")
-
-    print("--------------------------------\n\n")
+        print(f"     {len([f for f in os.listdir(d) if f.endswith('.csv') ]):5d} inside \""+d+"\" ")
+    # Filaments
+    print(f"-  {int(np.sum(structures_list)):d} total filaments.")
+    # Classes
+    print(f"-  {int(np.concatenate(classes_list).flatten().shape[0]):d} total points subdivided as follows:")
+    for cl in classes:
+        n = 0
+        for content_classes in classes_list:
+            n += np.sum(content_classes == cl)
+        print(f"    Class {cl:d}: {n:8d} points")
+    print("------------------------------------------------------------------\n\n")
 
 
 

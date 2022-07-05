@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Dataset.DatasetCreator_utils import *
 
-
+view_dataset_statistics(); quit()
 
 # Example filament
 if 0:

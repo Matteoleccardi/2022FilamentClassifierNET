@@ -7,6 +7,11 @@ import numpy as np
 from DatasetCreator_utils import build_main_dataset
 
 if __name__ == "__main__":
+    # Manage directories
+    if os.path.basename(os.getcwd()) != "2022FilamentClassifierNET":
+        print("ERROR:\nEvery script must be executed from inside the 2022FilamentClassifierNET directory")
+        quit()
+    
     # Build dataset
     N_FILES = {
         "synthetic": 1,

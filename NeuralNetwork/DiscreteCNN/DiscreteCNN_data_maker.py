@@ -6,6 +6,7 @@ import os
 import torch
 import time
 from multiprocessing import Pool, cpu_count
+from threading import Thread
 from DiscreteCNN import preprocess
 
 # Function to save volumes in multiprocessing
@@ -17,6 +18,15 @@ def make_volume(data_row_as_list):
     torch_tensor = preprocess(points, int(data_row_as_list[1]), n_voxels_per_side=int(data_row_as_list[4]))
     torch.save(torch_tensor, data_row_as_list[3])
 
+def logger(n_target:int, dir_pt):
+    n = 0
+    pulse = False
+    while n < n_target:
+        n = len([name for name in os.listdir(dir_pt) if (os.path.isfile(os.path.join(dir_pt, name)) and name.endswith(".pt"))])
+        pulser = " | " if pulse else " - "
+        pulse = not pulse
+        print(f"{100*n/n_target}% completed. " + pulser, end="\r")
+        time.sleep(0.5)
 
 if __name__ == '__main__':
     # Manage directories
@@ -79,10 +89,13 @@ if __name__ == '__main__':
     multiprocess_inputs = []
     for row in data:
         multiprocess_inputs.append(row)
+    thr_logger = Thread(target=logger, args=(len(multiprocess_inputs), os.path.abspath(traindata_save_dir)) )
+    thr_logger.start()
     t0 = time.time()
     with Pool(processes=cpu_count()+1) as p:
             p.map(make_volume, multiprocess_inputs)
     t1 = time.time()
+    thr_logger.join()
     # Check if all data were created successfully
     missing_files = []
     for row in multiprocess_inputs:
@@ -96,15 +109,20 @@ if __name__ == '__main__':
         print(missing_files)
 
     # Put everything in CSV files
-    n_data = data.shape[0]
-    np.random.shuffle(data)
+    data_to_save = []
+    for n, c in zip(fnames_vol, flabels):
+        data_to_save.append((n, c))
+    data_to_save = np.array(data_to_save, dtype=[("fname","U256"),("class","i4")])
+    n_data = data_to_save.shape[0]
+    np.random.shuffle(data_to_save)
     # -> Create Training CSV
     idx_train = int(n_data*0.7)
-    np.savetxt(os.path.join(traindata_save_dir, f"train.csv"), data[:idx_train,[3,2]], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
+    np.savetxt(os.path.join(traindata_save_dir, f"train.csv"), data_to_save[:idx_train], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
     # -> Create Validation CSV
-    np.savetxt(os.path.join(traindata_save_dir, f"validation.csv"), data[idx_train:,[3,2]], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
+    np.savetxt(os.path.join(traindata_save_dir, f"validation.csv"), data_to_save[idx_train:], delimiter=",", header="Tensor file name,Class", fmt=["%s", "%d"])
     # -> Create Testing CSV
     # ... option not ready yet ...
+    print("----------------------------------------------------------------------")
     print("Training and validation datasets for DiscreteCNN successfully created.")
     print("Folder: " + traindata_save_dir)
     print("Total data: ", n_data)
@@ -112,4 +130,3 @@ if __name__ == '__main__':
     print(" |-- Validation data: ", n_data - idx_train)
     print(" |-- Test data: not yet created")
 
-# FIX ISSUES WITH SAVETXT: https://numpy.org/doc/stable/user/basics.rec.html
