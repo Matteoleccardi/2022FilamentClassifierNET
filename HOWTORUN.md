@@ -40,6 +40,7 @@ All packages should now be installed.
 1. activate the venv
 2. run ./Dataset/DatasetCreator.py
 3. run ./NeuralNetwork/DiscreteCNN/DiscreteCNN_data_maker.py
+4. run ./NeuralNetwork/DiscreteCNN/DiscreteCNN_data_loader.py
 
 # Running ready-made examples
 There are not ready-made examples yet.
