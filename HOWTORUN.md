@@ -10,6 +10,7 @@ Once completed, the folders structures has to be:
       - Dataset
       - NeuralNetwork
       - ...
+
 The base-folder of the whole project is *2022FilamentClassifierNET*: every script and python program has to be launched through the command line from here.
 You can freely move the whole *2022FilamentClassifierNET* anywhere in your computer, however you must not rename it.
 
@@ -20,15 +21,16 @@ NOTE: for Windows users, be sure while installing to add the python installation
 Once Python 3.10.5 has been installed, you should be able to open up a terminal and check that 'py --version' or 'python3 --version' or 'python3.10 --version' return *Python 3.10.5*.
 For any issue check the online resources of python.org or Stack Overflow.
 
-**2. Install required packages in a virtual environment.** The whole procedure can be found in the [python.org documentation](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). Once you get to the tutorial section [Creating a virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment), be sure to have the terminal located inside the *2022FilamentClassifierNET* folder. After creating the virtual environment, you should have:
+**3. Install required packages in a virtual environment.** The whole procedure can be found in the [python.org documentation](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). Once you get to the tutorial section [Creating a virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment), be sure to have the terminal located inside the *2022FilamentClassifierNET* folder. After creating the virtual environment, you should have:
 - 2022FilamentClassifierNET
   - Dataset
   - NeuralNetwork
   - ...
   - venv
+
 Now, you have to activate the virtual environment. To do so, keep following the [linked tutorial](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#activating-a-virtual-environment). NOTE: after you finish playing around with the project, be sure to deactivate the virtual environment.
 
-Now it is time to install the packages. Again, it should be as easy as to follow the instruction in the [linked tutorial](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#using-requirements-files). If your machine has an NVIDIA graphic card, then you should use *REQUIREMENTS_PY_NVIDIA.txt*, otherwise you should use *REQUIREMENTS_PY.txt*. It is possible that, for the installation to work, you will have to repeat the installation through '... -m pip install -r req_file.txt' a couple of times, untill all packages are installed without errors.
+It is time to install the packages. Again, it should be as easy as to follow the instruction in the [linked tutorial](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#using-requirements-files). If your machine has an NVIDIA graphic card, then you should use *REQUIREMENTS_PY_NVIDIA.txt*, otherwise you should use *REQUIREMENTS_PY.txt*. It is possible that, for the installation to work, you will have to repeat the installation through '... -m pip install -r req_file.txt' a couple of times, untill all packages are installed without errors.
 
 All packages should now be installed.
 
