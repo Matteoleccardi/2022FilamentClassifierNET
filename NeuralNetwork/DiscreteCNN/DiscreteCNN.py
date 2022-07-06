@@ -96,11 +96,10 @@ class DiscreteCNN(nn.Module):
         out = self.conv2(out)
         out = self.conv3(out)
         out = out.view(out.size(0), -1)
-        print(out.shape, ((self.n_voxels_per_side-3*3)**3)*16)
         out = self.fc1(out)
         out = self.fc2(out)
         out = self.softmax(out)
-        out = out.flatten()
+        #out = out.flatten()
         return out
 
     def ConvLayer3D(self, in_c, out_c, kernel_size=3):

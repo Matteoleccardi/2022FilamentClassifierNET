@@ -44,8 +44,8 @@ class DiscreteCNN_Dataset(Dataset):
         else:
             im_tensor = torch.load(self.csv[idx]["fname"])
             im_tensor = torch.squeeze(im_tensor, 0)
-            label_tensor = torch.zeros((1, self.n_classes))
-            label_tensor[0, int(self.csv[idx]["class"])] = 1
+            label_tensor = torch.zeros((self.n_classes,))
+            label_tensor[int(self.csv[idx]["class"])] = 1
         sample = {"input_t": im_tensor, "label_t": label_tensor}
         return sample
 
