@@ -363,4 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 Dataset/synthetic_dataset/*
 NeuralNetwork/DiscreteCNN/train_valid_data/*
+NeuralNetwork/DiscreteCNN/trained_networks/*
 venv/*
