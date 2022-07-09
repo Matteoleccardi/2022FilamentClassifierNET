@@ -35,17 +35,16 @@ class DiscreteCNN_Dataset(Dataset):
             idx = list(range(idx.stop)[idx])
         # Get data and labels
         if type(idx) is list:
-            label_tensor = torch.zeros((len(idx), self.n_classes))
+            label_tensor = torch.zeros((len(idx), 1))
             im_list = []
             for i, c in zip(idx, range(len(idx)) ):
                 im_list.append( torch.load(self.csv[i]["fname"]) )
-                label_tensor[c, int(self.csv[i]["class"])] = 1
+                label_tensor[c, 0] = int(self.csv[i]["class"])
             im_tensor = torch.cat(im_list, dim=0) # torch.cat(tuple(im_list), dim=0)
         else:
             im_tensor = torch.load(self.csv[idx]["fname"])
             im_tensor = torch.squeeze(im_tensor, 0)
-            label_tensor = torch.zeros((self.n_classes,))
-            label_tensor[int(self.csv[idx]["class"])] = 1
+            label_tensor = torch.tensor( int(self.csv[idx]["class"]) )
         sample = {"input_t": im_tensor, "label_t": label_tensor}
         return sample
 

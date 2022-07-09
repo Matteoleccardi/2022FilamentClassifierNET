@@ -37,6 +37,10 @@ if __name__ == '__main__':
     dataset_dir_list = ["synthetic_dataset", "CAT08_dataset"]
     traindata_save_dir = os.path.join(os.getcwd(), "NeuralNetwork", "DiscreteCNN", "train_valid_data")
 
+    # Clean files directory
+    for f in [ fi for fi in os.listdir(traindata_save_dir) if fi.endswith(".pt") ]:
+        os.remove(os.path.join(traindata_save_dir, f))
+
     # Dataset infos
     classes = [0, 1, 2, 3, 4]
     n_voxels_per_side=41
@@ -85,14 +89,14 @@ if __name__ == '__main__':
     data = np.array(data).T
 
     # Make the volumetric data with multiprocess
-    print(f"Creating torch input tensors on {cpu_count()+1} processes (= number of CPUs cores + 1)...")
+    print(f"Creating torch input tensors on {cpu_count()} processes (= number of CPUs cores)...")
     multiprocess_inputs = []
     for row in data:
         multiprocess_inputs.append(row)
     thr_logger = Thread(target=logger, args=(len(multiprocess_inputs), os.path.abspath(traindata_save_dir)) )
     thr_logger.start()
     t0 = time.time()
-    with Pool(processes=cpu_count()+1) as p:
+    with Pool(processes=cpu_count()) as p:
             p.map(make_volume, multiprocess_inputs)
     t1 = time.time()
     thr_logger.join()

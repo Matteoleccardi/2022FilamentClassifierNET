@@ -1,5 +1,5 @@
 Dataset
-- pannello di controllo per creazione dataset
+- multiprocessing
 - Filaments -> first training and validation round
 - Filaments from CAT08 -> final network fine tuning through training/validation + Final testing on real extracted trees 
 
@@ -12,3 +12,7 @@ Netwoks
 	- tokenisation
 	- attention based transformer
 
+Requirements
+- do requirements by installing a venv yourself, with just the strictly needed packages
+- includi pyqt5 nei req per linux
+- non serve distinguere fra cuda e non-cuda -> distingui fra windows-mac-linux

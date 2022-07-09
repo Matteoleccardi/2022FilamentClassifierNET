@@ -85,7 +85,6 @@ import numpy as np
 from scipy import interpolate as scipy_interpolate
 import matplotlib.pyplot as plt
 import os
-from queue import Queue
 from threading import Thread
 import time
 

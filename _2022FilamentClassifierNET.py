@@ -4,6 +4,7 @@
 '''
 
 import numpy as np
+import torch
 import matplotlib.pyplot as plt
 from Dataset.DatasetCreator_utils import *
 
@@ -13,11 +14,10 @@ if os.path.basename(os.getcwd()) != "2022FilamentClassifierNET":
     quit()
     
 
-view_dataset_statistics(); quit()
 
 # Example filament
 if 0:
-    p=make_classes_demo()
+    p=makefilament_classes_demo()
     visualize_dataset_3D(p)
 
 # fil creation trial
@@ -32,23 +32,36 @@ if 0:
         pts = makefilament_aggregator(makefilament_003, n, l, 10)
         visualize_dataset_3D(pts)
 
-# NN models
-from NeuralNetwork.DiscreteCNN.DiscreteCNN import *
-# model
-n_voxels_per_side=41
-model = DiscreteCNN(n_voxels_per_side=n_voxels_per_side, out_point_classes=5)
-model.eval()
-# filament
-np.random.seed(0)
-pts = makefilament_001(120, 10)
-# tensor from filament
-vol = preprocess(pts[:,:3], index=15, n_voxels_per_side=n_voxels_per_side)
+# NN models tests
+if 1:
+    from NeuralNetwork.DiscreteCNN.DiscreteCNN import DiscreteCNN
+    # filament
+    pts=makefilament_classes_demo()
 
-outputs = model(vol)
-print(outputs)
-view_input_volume(torch.squeeze(torch.squeeze(vol,0),0))
+    # model
+    model_name = "model_20220708_181634.pt"
+    n_voxels_per_side=41
+    model = DiscreteCNN(n_voxels_per_side=n_voxels_per_side, out_point_classes=5)
+    model.load_state_dict(torch.load("./NeuralNetwork/DiscreteCNN/trained_networks/"+model_name))
+    model.eval()
+
+    # try classification
+    inferred_classes = np.zeros((pts.shape[0],1))
+    for index in range(pts.shape[0]):
+        print(f"Classified {index+1} of {pts.shape[0]}", end="\r")
+        with torch.no_grad():
+            outputs = model(pts[:,:3], index)
+        cl = np.argmax(outputs.numpy())
+        inferred_classes[index,0] = cl
+
+    # view output
+    visualize_dataset_3D(pts)
+    out = np.append(pts[:,:3],inferred_classes, axis=1)
+    out = np.append(out, np.zeros((pts.shape[0],1)), axis=1)
+    visualize_dataset_3D(out)
 
 
 
-quit()
+
+
 

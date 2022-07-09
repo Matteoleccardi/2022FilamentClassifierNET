@@ -361,7 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-Dataset/synthetic_dataset/*
-NeuralNetwork/DiscreteCNN/train_valid_data/*
-NeuralNetwork/DiscreteCNN/trained_networks/*
-venv/*
+Dataset/synthetic_dataset/*.csv
+NeuralNetwork/DiscreteCNN/train_valid_data/*.pt
+NeuralNetwork/DiscreteCNN/train_valid_data/*.csv
+NeuralNetwork/DiscreteCNN/trained_networks/*.pt
+env/

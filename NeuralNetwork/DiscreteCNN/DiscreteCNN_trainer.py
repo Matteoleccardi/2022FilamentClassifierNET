@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import cpu_count
 
-from DiscreteCNN import DiscreteCNN
+from DiscreteCNN import DiscreteCNN_core
 from DiscreteCNN_data_loader import DiscreteCNN_Dataset
 
 if __name__ == "__main__":
@@ -21,10 +21,10 @@ if __name__ == "__main__":
     model_name = now.strftime("model_%Y%m%d_%H%M%S.pt")
     # Set hyperparams
     n_classes = 5
-    n_training_steps = 350
+    n_training_steps = 750
     batch_size = 32
-    num_workers = int(cpu_count()) if not torch.cuda.is_available() else 16
-    lr0 = 0.002
+    num_workers = np.min([batch_size, int(cpu_count()) if not torch.cuda.is_available() else torch.cuda.device_count()])
+    lr0 = 0.001
     # Get training data
     csv_file = os.path.join(os.getcwd(), "NeuralNetwork", "DiscreteCNN", "train_valid_data", "train.csv")
     train_dataset = DiscreteCNN_Dataset(csv_file, n_classes=n_classes)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Get the used device
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # Create network
-    model = DiscreteCNN(n_voxels_per_side=41, out_point_classes=n_classes)
+    model = DiscreteCNN_core(n_voxels_per_side=41, out_point_classes=n_classes)
     model.to(device)
     # Loss, optmiser, lerning-rate trajectory
     criterion = torch.nn.CrossEntropyLoss()
@@ -89,8 +89,8 @@ if __name__ == "__main__":
                     # save res
                     v_loss += criterion(outputs, labels).item()/len(valid_loader)
                     for rowL, rowO in zip(labels, outputs):
-                        idx_r = int( np.argmax(rowL.cpu().detach().numpy()) )
-                        idx_c = int( np.argmax(rowO.cpu().detach().numpy()) )
+                        idx_r = int( rowL.cpu().detach().numpy() )
+                        idx_c = int( np.argmax( torch.nn.Softmax(dim=-1)(rowO).cpu().detach().numpy()) )
                         confusion_matrix_image[idx_r, idx_c] += 1
             v_loss_list.append(v_loss)
             v_steps_list.append(training_step)
@@ -98,15 +98,22 @@ if __name__ == "__main__":
         ax0.clear()
         ax0.plot(t_loss_list, "r-", label="T")
         ax0.plot(v_steps_list,v_loss_list, "b-", label="V")
+        ax0.set_ylabel("Cross Entropy loss")
+        ax0.set_xlabel("Training steps")
+        ax0.set_title("Learning trajectory")
+        ax0.legend()
+        for row in confusion_matrix_image:
+            row = row / np.sum(row) if np.sum(row) != 0 else row * 0
         ax1.clear()
         ax1.imshow(confusion_matrix_image)
-        ax1.set_ylabel("truth")
-        ax1.set_xlabel("prediction")
+        ax1.set_ylabel("True class (%)")
+        ax1.set_xlabel("predicted class (%)")
+        ax1.set_title("Confusion matrix\n(row-wise normalisation)")
         plt.pause(0.5)
         # Save model params if validation is the best
-        if (training_step != 0):
-            if (np.min(v_loss_list) == v_loss_list[-1]):
-                        torch.save(model.state_dict(), os.path.join(os.getcwd(), "NeuralNetwork", "DiscreteCNN", "trained_networks", model_name))
+        if training_step != 0:
+            if np.min(v_loss_list) == v_loss_list[-1]:
+                torch.save(model.state_dict(), os.path.join(os.getcwd(), "NeuralNetwork", "DiscreteCNN", "trained_networks", model_name))
     print('Finished Training')
     plt.ioff()
     plt.show()

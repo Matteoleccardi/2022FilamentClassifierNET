@@ -71,37 +71,16 @@ def preprocess(filament: np.ndarray, index: int, n_voxels_per_side: int=31) -> t
     return volume
 
 
-class DiscreteCNN(nn.Module):
+class DiscreteCNN_core(nn.Module):
     def __init__(self, n_voxels_per_side, out_point_classes):
-        super(DiscreteCNN, self).__init__()
+        super(DiscreteCNN_core, self).__init__()
         self.n_voxels_per_side = n_voxels_per_side
         self.conv1 = self.ConvLayer3D(1, 32)
         self.conv2 = self.ConvLayer3D(32, 64)
         self.conv3 = self.ConvLayer3D(64, 16, kernel_size=5)
         self.fc1   = self.FCLayer(574992, 64)
         self.fc2  = nn.Linear(64, out_point_classes)
-        self.softmax = nn.Softmax(dim=1)
     
-    def forward(self, volume):
-        '''
-            Input
-            -----
-                volume: a torch 5-dimensional tensor: [batch_idx, channel_idx, z_idx, y_idx, x_idx] 
-            Output
-            ------
-                Probability distribution over "out_point_classes"
-        '''
-        # NN stack
-        out = self.conv1( volume )
-        out = self.conv2(out)
-        out = self.conv3(out)
-        out = out.view(out.size(0), -1)
-        out = self.fc1(out)
-        out = self.fc2(out)
-        out = self.softmax(out)
-        #out = out.flatten()
-        return out
-
     def ConvLayer3D(self, in_c, out_c, kernel_size=3):
         conv_layer = nn.Sequential(
             nn.Conv3d(in_c, out_c, kernel_size=kernel_size),
@@ -118,13 +97,40 @@ class DiscreteCNN(nn.Module):
             nn.Dropout(p=0.10) 
         )
         return fc_layer
+
+    def forward(self, volume):
+        '''
+            Input
+            -----
+                volume: a torch 5-dimensional tensor: [batch_idx, channel_idx, z_idx, y_idx, x_idx] 
+            Output
+            ------
+                Probability distribution over "out_point_classes"
+        '''
+        # NN stack
+        out = self.conv1( volume )
+        out = self.conv2(out)
+        out = self.conv3(out)
+        out = out.view(out.size(0), -1)
+        out = self.fc1(out)
+        out = self.fc2(out)
+        return out
+
     
+class DiscreteCNN(DiscreteCNN_core):
+    ''' This is a wrapper class that makes the NN behave,
+        input-wise, as any other NN in the project.
+    '''
+    def __init__(self, n_voxels_per_side, out_point_classes):
+        super(DiscreteCNN, self).__init__(n_voxels_per_side, out_point_classes)
+        self.softmax = nn.Softmax(dim=1)
 
-# define dataset creator (all images - class couples) in a subfolder
+    def forward(self, filament, index):
+        input_tensor = preprocess(filament, index, self.n_voxels_per_side)
+        out = super(DiscreteCNN, self).forward(input_tensor)
+        out = self.softmax(out) # shape: (1, out_point_classes)
+        return out
 
-# define the dataloader in new file
-
-# build train-validation cycles in new file -> save model parameters 
 
 
 
