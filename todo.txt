@@ -11,8 +11,3 @@ Netwoks
 - Attention based transformers
 	- tokenisation
 	- attention based transformer
-
-Requirements
-- do requirements by installing a venv yourself, with just the strictly needed packages
-- includi pyqt5 nei req per linux
-- non serve distinguere fra cuda e non-cuda -> distingui fra windows-mac-linux

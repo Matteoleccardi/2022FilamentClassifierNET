@@ -51,9 +51,13 @@ if __name__ == "__main__":
 
     # Training + Validation cycle
     plt.ion()
-    fig, (ax0, ax1) = plt.subplots(1, 2) # losses, confsion-matrix
+    fig = plt.figure()
+    spec = fig.add_gridspec(2, 3)
+    ax_tv = fig.add_subplot(spec[:,:2]) # losses
+    ax_im = fig.add_subplot(spec[0,2])  # confusion matrix
+    ax_rw = fig.add_subplot(spec[1,2])  # accuracy chart
     t_loss_list = []
-    v_loss_list, v_steps_list = [], []
+    v_loss_list, v_steps_list, v_right_wrong_list = [], [], []
     for training_step in range(n_training_steps):
         print(f"Train step {training_step:3d}", end="\r")
         # Training ------------------------------
@@ -81,10 +85,11 @@ if __name__ == "__main__":
         if (training_step == 0) or (training_step%5 == 0):
             v_loss = 0.0
             confusion_matrix_image = np.zeros((n_classes, n_classes))
+            right, wrong = 0, 0
             with torch.no_grad():
                 for i, v_data in enumerate(valid_loader, 0):
-                    inputs = data["input_t"].to(device)
-                    labels = data["label_t"].to(device)
+                    inputs = v_data["input_t"].to(device)
+                    labels = v_data["label_t"].to(device)
                     outputs = model(inputs)
                     # save res
                     v_loss += criterion(outputs, labels).item()/len(valid_loader)
@@ -92,23 +97,38 @@ if __name__ == "__main__":
                         idx_r = int( rowL.cpu().detach().numpy() )
                         idx_c = int( np.argmax( torch.nn.Softmax(dim=-1)(rowO).cpu().detach().numpy()) )
                         confusion_matrix_image[idx_r, idx_c] += 1
+                        if idx_r == idx_c:
+                            right += 1
+                        else:
+                            wrong += 1
             v_loss_list.append(v_loss)
             v_steps_list.append(training_step)
+            v_right_wrong_list.append([right, wrong])
         # Display images -------------------------
-        ax0.clear()
-        ax0.plot(t_loss_list, "r-", label="T")
-        ax0.plot(v_steps_list,v_loss_list, "b-", label="V")
-        ax0.set_ylabel("Cross Entropy loss")
-        ax0.set_xlabel("Training steps")
-        ax0.set_title("Learning trajectory")
-        ax0.legend()
-        for row in confusion_matrix_image:
-            row = row / np.sum(row) if np.sum(row) != 0 else row * 0
-        ax1.clear()
-        ax1.imshow(confusion_matrix_image)
-        ax1.set_ylabel("True class (%)")
-        ax1.set_xlabel("predicted class (%)")
-        ax1.set_title("Confusion matrix\n(row-wise normalisation)")
+        #
+        ax_tv.clear()
+        ax_tv.plot(t_loss_list, "r-", label="T", linewidth=0.7)
+        ax_tv.plot(v_steps_list,v_loss_list, "b-", label="V", linewidth=1.4)
+        ax_tv.set_ylabel("Cross Entropy loss")
+        ax_tv.set_xlabel("Training steps")
+        ax_tv.set_title("Learning trajectory")
+        ax_tv.legend()
+        ax_tv.grid()
+        #
+        for r in range(confusion_matrix_image.shape[0]):
+            confusion_matrix_image[r,:] = confusion_matrix_image[r,:] / np.sum(confusion_matrix_image[r,:]) if np.sum(confusion_matrix_image[r,:]) != 0 else 0*confusion_matrix_image[r,:]
+        ax_im.clear()
+        ax_im.imshow(confusion_matrix_image, vmin=0, vmax=1, cmap="bone")
+        ax_im.set_ylabel("True class (%)")
+        ax_im.set_xlabel("Predicted class (%)")
+        ax_im.set_title("Confusion matrix\n(with row-wise normalisation)")
+        #
+        rwl = np.array(v_right_wrong_list)
+        n_valid = rwl[-1,0] + rwl[-1,1]
+        ax_rw.plot(v_steps_list, rwl[:,0], label="Right classification")
+        ax_rw.plot([0, v_steps_list[-1]], [n_valid, n_valid], "--", color="black", label="Tot")
+        ax_rw.legend()
+        ax_rw.set_title(f"Correct inferences: {rwl[-1,0]:4d} ({100 * rwl[-1,0]/n_valid:3.2f}%)")
         plt.pause(0.5)
         # Save model params if validation is the best
         if training_step != 0:

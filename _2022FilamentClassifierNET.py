@@ -55,6 +55,7 @@ if 1:
         inferred_classes[index,0] = cl
 
     # view output
+    print(f"Accuracy: {100 * np.sum(inferred_classes[:,0]==pts[:,3])/pts.shape[0] :3.2f}%")
     visualize_dataset_3D(pts)
     out = np.append(pts[:,:3],inferred_classes, axis=1)
     out = np.append(out, np.zeros((pts.shape[0],1)), axis=1)
